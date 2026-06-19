@@ -100,6 +100,7 @@ Usuario sin autenticación que accede al contenido público de la plataforma.
 - Como usuario invitado, quiero buscar obras por título, para encontrar rápidamente una serie específica.
 - Como usuario invitado, quiero ver los detalles de una obra, para conocer su descripción, género, autor y estado.
 - Como usuario invitado, quiero visualizar los capítulos de una obra, para acceder al contenido publicado.
+- Como usuario invitado, quiero filtrar las obras por tipo o estado, para explorar únicamente el formato de contenido que me interesa leer.
 
 > Para el rol de LECTOR
 
@@ -108,17 +109,20 @@ Usuario sin autenticación que accede al contenido público de la plataforma.
 - Como lector, quiero registrar mi progreso de lectura, para continuar desde el capítulo donde me quedé.
 - Como lector, quiero dejar comentarios en las obras y capítulos, para compartir mi opinión con otros usuarios.
 - Como lector, quiero editar o eliminar mis propios comentarios, para mantener actualizada mi participación.
+- Como lector, quiero actualizar la información de mi perfil, para mantener mis datos de cuenta al día y seguros.
 
 > Para el rol de EDITOR
 
 - Como editor, quiero crear y actualizar obras, para mantener el catálogo organizado y vigente.
 - Como editor, quiero gestionar capítulos y su contenido, para publicar nuevas entregas de cada obra.
+- Como editor, quiero subir imágenes para las portadas y las páginas de los capítulos, para que los usuarios puedan visualizar correctamente el contenido multimedia de la obra.
 
 > Para el rol de ADMINISTRADOR
 
 - Como administrador, quiero moderar comentarios y reportes, para mantener un entorno ordenado y seguro.
 - Como administrador, quiero gestionar usuarios y permisos, para controlar el acceso a las funciones del sistema.
 - Como administrador, quiero administrar géneros, etiquetas y categorías, para mejorar la organización del contenido.
+- Como administrador, quiero cambiar el rol de un usuario, para delegar tareas de mantenimiento del catálogo a miembros de confianza de la comunidad.
 
 ## Funcionalidades principales del proyecto
 
@@ -128,16 +132,20 @@ Usuario sin autenticación que accede al contenido público de la plataforma.
 | Como usuario invitado, quiero buscar obras por título, para encontrar rápidamente una serie específica.               | Buscar obras                              |
 | Como usuario invitado, quiero ver los detalles de una obra, para conocer su descripción, género, autor y estado.      | Consultar detalle de obra                 |
 | Como usuario invitado, quiero visualizar los capítulos de una obra, para acceder al contenido publicado.              | Visualizar capítulos                      |
+| Como usuario invitado, quiero filtrar las obras para explorar únicamente el formato de contenido que me interesa leer.| Filtrar catálogo avanzado                 |
 | Como lector, quiero registrarme e iniciar sesión, para guardar mis preferencias y acceder a funciones personalizadas. | Registro e inicio de sesión               |
 | Como lector, quiero marcar obras como favoritas, para tener un acceso rápido a las que sigo.                          | Gestionar favoritos                       |
 | Como lector, quiero registrar mi progreso de lectura, para continuar desde el capítulo donde me quedé.                | Gestionar progreso de lectura             |
 | Como lector, quiero dejar comentarios en las obras y capítulos, para compartir mi opinión con otros usuarios.         | Publicar comentarios                      |
 | Como lector, quiero editar o eliminar mis propios comentarios, para mantener actualizada mi participación.            | Gestionar comentarios propios             |
+| Como lector, quiero actualizar la información de mi perfil, para mantener mis datos de cuenta al día y seguros.       | Actualizar perfil de usuario              |
 | Como editor, quiero crear y actualizar obras, para mantener el catálogo organizado y vigente.                         | Gestionar obras                           |
 | Como editor, quiero gestionar capítulos y su contenido, para publicar nuevas entregas de cada obra.                   | Gestionar capítulos                       |
+| Como editor, quiero subir imágenes para las portadas o capítulos, para que puedan visualizar el contenido.            | Gestionar archivos multimedia             | 
 | Como administrador, quiero moderar comentarios y reportes, para mantener un entorno ordenado y seguro.                | Moderar comentarios                       |
 | Como administrador, quiero gestionar usuarios y permisos, para controlar el acceso a las funciones del sistema.       | Gestionar usuarios y roles                |
 | Como administrador, quiero administrar géneros, etiquetas y categorías, para mejorar la organización del contenido.   | Gestionar géneros, etiquetas y categorías |
+| Como administrador, quiero cambiar el rol de un usuario para delegar tareas a miembros de confianza de la comunidad.  | Modificar rol de usuario                  |
 
 ## Modelo de datos inicial
 
