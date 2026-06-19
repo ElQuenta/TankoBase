@@ -143,8 +143,156 @@ Usuario sin autenticación que accede al contenido público de la plataforma.
 
 ## Endpoints tentativos de la API
 
+| Método | Endpoint             | Descripción                            |
+| ------ | -------------------- | -------------------------------------- |
+| POST   | `/api/auth/register` | Registrar un nuevo usuario             |
+| POST   | `/api/auth/login`    | Iniciar sesión                         |
+| GET    | `/api/auth/profile`  | Obtener perfil del usuario autenticado |
+| PUT    | `/api/auth/profile`  | Actualizar perfil del usuario          |
+
+### Obras
+
+| Método | Endpoint                  | Descripción                  |
+| ------ | ------------------------- | ---------------------------- |
+| GET    | `/api/works`              | Listar obras                 |
+| GET    | `/api/works/:id`          | Obtener detalle de una obra  |
+| POST   | `/api/works`              | Crear una obra               |
+| PUT    | `/api/works/:id`          | Actualizar una obra          |
+| DELETE | `/api/works/:id`          | Eliminar una obra            |
+| GET    | `/api/works/search`       | Buscar obras                 |
+| GET    | `/api/works/:id/chapters` | Listar capítulos de una obra |
+
+### Capítulos
+
+| Método | Endpoint            | Descripción                    |
+| ------ | ------------------- | ------------------------------ |
+| GET    | `/api/chapters/:id` | Obtener detalle de un capítulo |
+| POST   | `/api/chapters`     | Crear capítulo                 |
+| PUT    | `/api/chapters/:id` | Actualizar capítulo            |
+| DELETE | `/api/chapters/:id` | Eliminar capítulo              |
+
+### Favoritos
+
+| Método | Endpoint                 | Descripción                   |
+| ------ | ------------------------ | ----------------------------- |
+| GET    | `/api/favorites`         | Obtener favoritos del usuario |
+| POST   | `/api/favorites/:workId` | Agregar obra a favoritos      |
+| DELETE | `/api/favorites/:workId` | Eliminar obra de favoritos    |
+
+### Progreso de Lectura
+
+| Método | Endpoint                        | Descripción                 |
+| ------ | ------------------------------- | --------------------------- |
+| GET    | `/api/reading-progress`         | Obtener progreso de lectura |
+| POST   | `/api/reading-progress`         | Registrar progreso          |
+| PUT    | `/api/reading-progress/:workId` | Actualizar progreso         |
+
+### Comentarios
+
+| Método | Endpoint                           | Descripción                        |
+| ------ | ---------------------------------- | ---------------------------------- |
+| GET    | `/api/comments/work/:workId`       | Obtener comentarios de una obra    |
+| GET    | `/api/comments/chapter/:chapterId` | Obtener comentarios de un capítulo |
+| POST   | `/api/comments`                    | Crear comentario                   |
+| PUT    | `/api/comments/:id`                | Editar comentario                  |
+| DELETE | `/api/comments/:id`                | Eliminar comentario                |
+
+### Géneros y Etiquetas
+
+| Método | Endpoint          | Descripción         |
+| ------ | ----------------- | ------------------- |
+| GET    | `/api/genres`     | Listar géneros      |
+| POST   | `/api/genres`     | Crear género        |
+| PUT    | `/api/genres/:id` | Actualizar género   |
+| DELETE | `/api/genres/:id` | Eliminar género     |
+| GET    | `/api/tags`       | Listar etiquetas    |
+| POST   | `/api/tags`       | Crear etiqueta      |
+| PUT    | `/api/tags/:id`   | Actualizar etiqueta |
+| DELETE | `/api/tags/:id`   | Eliminar etiqueta   |
+
+### Administración de Usuarios
+
+| Método | Endpoint              | Descripción                   |
+| ------ | --------------------- | ----------------------------- |
+| GET    | `/api/users`          | Listar usuarios               |
+| GET    | `/api/users/:id`      | Obtener usuario               |
+| PUT    | `/api/users/:id/role` | Actualizar rol de usuario     |
+| DELETE | `/api/users/:id`      | Desactivar o eliminar usuario |
+
+### Archivos y Recursos
+
+| Método | Endpoint               | Descripción                  |
+| ------ | ---------------------- | ---------------------------- |
+| POST   | `/api/uploads/cover`   | Subir portada de una obra    |
+| POST   | `/api/uploads/chapter` | Subir páginas de un capítulo |
+| DELETE | `/api/uploads/:id`     | Eliminar archivo             |
+
 ## Reglas de negocio
+
+- Toda obra debe tener un título antes de ser registrada en el sistema.
+- Una obra debe pertenecer al menos a un género.
+- No se puede publicar una obra sin una portada asociada.
+- Un capítulo debe estar asociado a una única obra.
+- No se puede crear un capítulo sin un número o identificador válido.
+- Un capítulo debe contener al menos una página o archivo de contenido para ser publicado.
+- Solo los usuarios con rol Administrador o Editor pueden crear, modificar o eliminar obras.
+- Solo los usuarios con rol Administrador o Editor pueden crear, modificar o eliminar capítulos.
+- Solo los usuarios autenticados pueden agregar obras a favoritos.
+- Solo los usuarios autenticados pueden registrar o actualizar su progreso de lectura.
+- Solo los usuarios autenticados pueden publicar comentarios.
+- Un usuario solo puede editar o eliminar sus propios comentarios.
+- Los administradores pueden moderar o eliminar cualquier comentario que incumpla las normas de la plataforma.
+- Un usuario no puede registrar más de una vez la misma obra en su lista de favoritos.
+- El progreso de lectura de un usuario debe corresponder a un capítulo existente de la obra.
+- Los usuarios invitados pueden visualizar obras, capítulos y comentarios, pero no pueden realizar acciones de modificación.
+- Cada usuario debe tener un correo electrónico único dentro del sistema.
+- Los roles de usuario solo pueden ser asignados o modificados por un administrador.
+- Una obra solo puede tener uno de los siguientes tipos: Manga, Manhwa o Manhua.
+- El estado de una obra debe pertenecer a los valores definidos por el sistema (por ejemplo: En emisión, Finalizado, Pausado o Cancelado).
+- No se puede eliminar una obra que tenga capítulos asociados sin eliminar o reasignar previamente dichos capítulos.
 
 ## Tecnologías a utilizar
 
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT para autenticación
+- Postman para pruebas
+- GitHub para control de versiones
+- Swagger/OpenAPI para documentación, si corresponde
+- Multer para recepción de archivos
+- winston para Loggers
+
 ## Alcance del proyecto
+
+Incluye
+- Registro, autenticación y gestión de usuarios.
+- Gestión de roles (Administrador, Editor y Lector).
+- CRUD de obras (Mangas, Manhwas y Manhuas).
+- CRUD de capítulos.
+- Gestión de géneros, etiquetas y categorías.
+- Consulta y búsqueda de obras mediante filtros.
+- Sistema de favoritos.
+- Registro y seguimiento del progreso de lectura.
+- Sistema de comentarios en obras y capítulos.
+- Moderación de comentarios por parte de administradores y editores.
+- Carga y gestión de portadas y archivos asociados a capítulos.
+- Validación de datos y reglas de negocio.
+- API REST desarrollada con Node.js y Express.js.
+- Control de acceso basado en roles.
+- Documentación básica de endpoints y arquitectura del sistema.
+No incluye
+- Plataforma de lectura optimizada.
+- Sistema de monetización o suscripciones.
+- Pasarelas de pago o procesamiento de transacciones.
+- Integración con redes sociales externas.
+- Sistema de notificaciones en tiempo real.
+- Envío real de correos electrónicos.
+- Sistema de recomendaciones basado en inteligencia artificial.
+- Traducción automática de contenido.
+- Gestión de derechos de autor o licenciamiento de obras.
+- Funcionalidades de streaming o distribución multimedia avanzada.
+- Herramientas avanzadas de análisis y estadísticas para administradores.
+- Moderación automática mediante inteligencia artificial.
+- Infraestructura de producción, balanceo de carga o despliegue distribuido.
