@@ -8,7 +8,7 @@ export function GetErrorCode(err) {
   return { statusCode: 501, message: 'Not Implemented' };
 }
 
-export function ErrorResponseHandler(err, _req, res) {
+export function ErrorResponseHandler(res, err) {
   const { statusCode, message } = GetErrorCode(err);
   res.status(statusCode).json({
     success: false,
