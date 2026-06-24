@@ -45,7 +45,7 @@ export const loginUser = async (email, password) => {
   try {
     const user = await AuthData.getUserByEmail(email);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('Invalid credentials', 401);
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
