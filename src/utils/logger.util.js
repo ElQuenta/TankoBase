@@ -41,7 +41,7 @@ export function catchAndLogError(logger, error, message) {
   throw error instanceof AppError ? error : new AppError(message, 500);
 }
 
-function getErrorDetails(error) {
+export function getErrorDetails(error) {
   if (error instanceof Error) {
     return {
       name: error.name,
