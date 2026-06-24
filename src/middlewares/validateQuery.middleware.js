@@ -14,9 +14,8 @@ export function validateQuery(schema) {
       const details = error.details.map((d) => d.message).join(', ');
 
       ErrorResponseHandler(
-        new AppError(`Validation error: ${details}`, 400),
-        req,
         res,
+        new AppError(`Validation error: ${details}`, 400)
       );
 
       return;

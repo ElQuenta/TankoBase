@@ -13,9 +13,8 @@ export function validateBody(schema) {
       const details = error.details.map((d) => d.message).join(', ');
 
       ErrorResponseHandler(
-        new AppError(`Validation error: ${details}`, 400),
-        req,
-        res
+        res,
+        new AppError(`Validation error: ${details}`, 400)
       );
 
       return;

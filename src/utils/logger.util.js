@@ -35,20 +35,7 @@ export function createLogger(context) {
 
 export function catchAndLogError(logger, error, message) {
   if (!(error instanceof AppError)) {
-    const errorDetails = getErrorDetails(error)
-    logger.error(message, { error: errorDetails });
+    logger.error(message, { error: error.message, stack: error.stack });
   }
   throw error instanceof AppError ? error : new AppError(message, 500);
-}
-
-export function getErrorDetails(error) {
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    };
-  }
-
-  return { error };
 }
