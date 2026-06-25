@@ -89,7 +89,7 @@ export async function updateCommentById(commentId, userId, content, userRole) {
       return null;
     }
 
-    const isOwner = comment.userId.toString() === userId;
+    const isOwner = comment.userId.toString() === userId.toString();
     const isModerator = userRole === "ADMINISTRATOR" || userRole === "EDITOR";
 
     if (!isOwner && !isModerator) {
@@ -114,7 +114,7 @@ export async function deleteCommentById(commentId, userId, userRole) {
       return null;
     }
 
-    const isOwner = comment.userId.toString() === userId;
+    const isOwner = comment.userId.toString() === userId.toString();
     const isModerator = userRole === "ADMINISTRATOR" || userRole === "EDITOR";
 
     if (!isOwner && !isModerator) {

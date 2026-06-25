@@ -1,4 +1,3 @@
-import { request, response } from 'express';
 import { AppError } from '../utils/errorApp.util.js';
 
 export function GetErrorCode(err) {

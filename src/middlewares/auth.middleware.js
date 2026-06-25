@@ -13,7 +13,7 @@ export function authenticate(req, res, next) {
     }
     const token = authHeader.slice(7);
     const decoded = jwt.verify(token, config.server.jwtSecret);
-    req.user = { id: Number(decoded.id), role: decoded.role };
+    req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch (error) {
     const appError = error instanceof AppError ? error : new AppError('Unauthorized', 401);

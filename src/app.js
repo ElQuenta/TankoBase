@@ -1,5 +1,4 @@
 import Express from 'express';
-import { createRequire } from 'module';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -24,7 +23,7 @@ const swaggerDocument = yaml.parse(
 const app = Express();
 
 app.use(requestLogger);
-
+app.use(Express.json());
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/auth', authRoutes);

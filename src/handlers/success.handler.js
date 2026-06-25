@@ -1,5 +1,3 @@
-import { request, response } from 'express';
-
 export function NoContentResponseHandler(res) {
   res.status(204).send();
 }
