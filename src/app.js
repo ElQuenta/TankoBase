@@ -1,4 +1,10 @@
 import Express from 'express';
+import { createRequire } from 'module';
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import yaml from 'yaml';
+import swaggerUi from 'swagger-ui-express';
 import { requestLogger } from './middlewares/logger.middleware.js';
 
 import authRoutes from './routes/auth.routes.js';
@@ -10,13 +16,16 @@ import followRoutes from './routes/follow.routes.js';
 import readingProgressRoutes from './routes/readingProgress.routes.js';
 import userRoutes from './routes/user.routes.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const swaggerDocument = yaml.parse(
+  readFileSync(resolve(__dirname, '../openapi.yaml'), 'utf-8')
+);
+
 const app = Express();
 
-app.use((req, res, next) => {
-  if (req.is('multipart/form-data')) return next();
-  Express.json()(req, res, next);
-});
 app.use(requestLogger);
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/work', workRoutes);
