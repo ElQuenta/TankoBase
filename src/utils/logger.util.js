@@ -1,6 +1,7 @@
 import winston from "winston";
 
 import config from '../config/config.js';
+import { AppError } from "./errorApp.util.js";
 
 const rootLogger = winston.createLogger({
   level: config.server.logLevel,
@@ -35,20 +36,11 @@ export function createLogger(context) {
 
 export function catchAndLogError(logger, error, message) {
   if (!(error instanceof AppError)) {
-    const errorDetails = getErrorDetails(error)
-    logger.error(message, { error: errorDetails });
+    logger.error(message, {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
   }
+
   throw error instanceof AppError ? error : new AppError(message, 500);
-}
-
-function getErrorDetails(error) {
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    };
-  }
-
-  return { error };
 }

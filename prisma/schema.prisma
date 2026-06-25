@@ -12,3 +12,76 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  ADMINISTRATOR
+  READER
+  EDITOR
+}
+
+model User {
+  id       String   @id @default(uuid()) @db.Uuid
+  username String
+  email    String
+  password String
+
+  role UserRole @default(READER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  readingProgresses ReadingProgress[]
+  follows           Follow[]
+  favorites         Favorite[]
+}
+
+model ReadingProgress {
+  userId    String   @db.Uuid
+  seriesId  String
+  episodeId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@id([userId, seriesId, episodeId])
+
+  @@index([userId])
+  @@index([seriesId])
+  @@index([userId, seriesId])
+}
+
+model Follow {
+  userId   String @db.Uuid
+  seriesId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@id([userId, seriesId])
+
+  @@index([userId])
+  @@index([seriesId])
+}
+
+model Favorite {
+  userId   String @db.Uuid
+  seriesId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@id([userId, seriesId])
+
+  @@index([userId])
+  @@index([seriesId])
+}

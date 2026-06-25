@@ -1,14 +1,17 @@
-import { request, response } from 'express';
 import { AppError } from '../utils/errorApp.util.js';
 
 export function GetErrorCode(err) {
   if (err instanceof AppError) {
     return { statusCode: err.statusCode, message: err.message };
   }
-  return { statusCode: 501, message: 'Not Implemented' };
+
+  return {
+    statusCode: 500,
+    message: err instanceof Error ? err.message : 'Internal Server Error'
+  };
 }
 
-export function ErrorResponseHandler(err, _req, res) {
+export function ErrorResponseHandler(res, err) {
   const { statusCode, message } = GetErrorCode(err);
   res.status(statusCode).json({
     success: false,
