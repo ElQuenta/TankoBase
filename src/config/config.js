@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const {
-  MONGO_URI: mongoUri,
+  MONGODB_URI: mongoUri,
   PORT: port = 3000,
   DATABASE_URL: databaseUrl,
   BLOB_READ_WRITE_TOKEN: vercelBlobToken,
