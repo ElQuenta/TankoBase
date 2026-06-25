@@ -14,6 +14,7 @@ export const prisma = new PrismaClient({ adapter });
 
 export async function connectDatabase() {
   try {
+    logger.debug(`Attempting to connect to PostgreSQL with URI: ${config.database.databaseUrl}`);
     await prisma.$connect();
     logger.info("Prisma connected successfully");
   } catch (error) {

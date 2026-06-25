@@ -1,87 +1,110 @@
-import { Work } from "../data/works.js";
+import { Work } from "../data/index.js";
+
 import { AppError } from "../utils/errorApp.util.js";
+import { catchAndLogError, createLogger } from "../utils/logger.util.js"
+
+const logger = createLogger('WorkService');
 
 export async function getAllWorks(filters = {}) {
-  const query = {};
+  try {
+    const query = {};
 
-  if (filters.status) {
-    query.status = filters.status;
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.type) {
+      query.type = filters.type;
+    }
+
+    if (filters.genre) {
+      query.genres = filters.genre;
+    }
+
+    if (filters.title) {
+      query.title = { $regex: filters.title, $options: "i" };
+    }
+
+    const works = await Work.find(query).populate("chapters");
+    return works;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error fetching works');
   }
-
-  if (filters.type) {
-    query.type = filters.type;
-  }
-
-  if (filters.genre) {
-    query.genres = filters.genre;
-  }
-
-  if (filters.title) {
-    query.title = { $regex: filters.title, $options: "i" };
-  }
-
-  const works = await Work.find(query).populate("chapters");
-  return works;
 }
 
 export async function getWorkById(workId) {
-  const work = await Work.findById(workId)
-    .populate("chapters")
-    .populate("comments");
+  try {
+    const work = await Work.findById(workId)
+      .populate("chapters")
+      .populate("comments");
 
-  return work;
+    return work;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error fetching work by ID');
+  }
 }
 
 export async function createWork(workData) {
-  const work = await Work.create({
-    title: workData.title,
-    synopsis: workData.synopsis,
-    banner: workData.banner,
-    type: workData.type,
-    status: workData.status ?? "En emision",
-    visits: workData.visits ?? 0,
-    followers: workData.followers ?? 0,
-    genres: workData.genres,
-    chapters: workData.chapters ?? [],
-    comments: workData.comments ?? []
-  });
+  try {
+    const work = await Work.create({
+      ...workData,
+      status: workData.status ?? "En emision",
+      visits: workData.visits ?? 0,
+      followers: workData.followers ?? 0,
+      chapters: workData.chapters ?? [],
+      comments: workData.comments ?? []
+    });
 
-  return work;
+    return work;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error creating work');
+  }
 }
 
 export async function updateWorkById(workId, updateData) {
-  const updatedWork = await Work.findByIdAndUpdate(workId, updateData, {
-    new: true,
-    runValidators: true
-  });
-
-  return updatedWork;
+  try {
+    const updatedWork = await Work.findByIdAndUpdate(workId, updateData, {
+      new: true,
+      runValidators: true
+    });
+    return updatedWork;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error updating work');
+  }
 }
 
 export async function deleteWorkById(workId) {
-  const work = await Work.findById(workId);
+  try {
+    const work = await Work.findById(workId);
 
-  if (!work) {
-    return null;
+    if (!work) {
+      return null;
+    }
+
+    if (work.chapters.length > 0) {
+      throw new AppError(
+        "Cannot delete a work that has associated chapters",
+        400
+      );
+    }
+
+    const deletedWork = await Work.findByIdAndDelete(workId);
+    return deletedWork;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error deleting work');
   }
-
-  if (work.chapters.length > 0) {
-    throw new AppError(
-      "Cannot delete a work that has associated chapters",
-      400
-    );
-  }
-
-  const deletedWork = await Work.findByIdAndDelete(workId);
-  return deletedWork;
 }
 
 export async function getWorkChapters(workId) {
-  const work = await Work.findById(workId).populate("chapters");
+  try {
+    const work = await Work.findById(workId).populate("chapters");
 
-  if (!work) {
-    return null;
+    if (!work) {
+      return null;
+    }
+
+    return work.chapters;
+  } catch (error) {
+    catchAndLogError(logger, error, 'Error fetching work chapters');
   }
-
-  return work.chapters;
 }

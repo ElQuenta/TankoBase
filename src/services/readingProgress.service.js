@@ -1,5 +1,5 @@
 import * as ReadingProgressData from "../data/readingProgress.data.js";
-import { validateChapterInWork } from "./chapter.service.js";
+import * as ChapterService from "./chapter.service.js";
 import { Work } from "../data/works.js";
 import { AppError } from "../utils/errorApp.util.js";
 
@@ -15,7 +15,7 @@ export async function createReadingProgress(userId, workId, chapterId) {
     throw new AppError("Work not found", 404);
   }
 
-  await validateChapterInWork(workId, chapterId);
+  await ChapterService.validateChapterInWork(workId, chapterId);
 
   const existingProgress = await ReadingProgressData.findReadingProgress(
     userId,
