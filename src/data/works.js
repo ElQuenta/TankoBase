@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-
-const WORK_STATUS = ["En emision", "Finalizado", "Pausado", "Cancelado"];
+import { WORK_STATUS, WORK_TYPES } from "../utils/work.constants.js";
 
 const workSchema = new mongoose.Schema({
   title: String,
   synopsis: String,
   banner: String,
+  type: { type: String, enum: WORK_TYPES },
   status: { type: String, enum: WORK_STATUS },
   visits: Number,
   followers: Number,

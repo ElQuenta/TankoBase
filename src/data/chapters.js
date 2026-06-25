@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-const CHAPTER_STATUS = ["Publicado", "Borrador", "Programado", "Oculto"];
+import { CHAPTER_STATUS } from "../utils/work.constants.js";
 
 const chapterSchema = new mongoose.Schema({
   number: Number,
