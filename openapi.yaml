@@ -1,0 +1,529 @@
+openapi: 3.0.3
+info:
+  title: TankoBase API
+  description: API pública de TankoBase — plataforma de lectura de manga, manhwa y manhua.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Auth
+    description: Registro e inicio de sesión
+  - name: Works
+    description: Obras (manga, manhwa, manhua)
+  - name: Chapters
+    description: Capítulos de una obra
+  - name: Comments
+    description: Comentarios en obras y capítulos
+
+paths:
+
+  # ─────────────────────────────────────────────
+  # AUTH
+  # ─────────────────────────────────────────────
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar un nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterBody'
+            example:
+              username: johndoe
+              email: john@example.com
+              password: Secret123!
+              role: READER
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Email o username ya en uso / datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginBody'
+            example:
+              email: john@example.com
+              password: Secret123!
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ─────────────────────────────────────────────
+  # WORKS
+  # ─────────────────────────────────────────────
+
+  /work:
+    get:
+      tags:
+        - Works
+      summary: Obtener todas las obras
+      description: Retorna la lista de obras con filtros opcionales.
+      parameters:
+        - name: title
+          in: query
+          description: Filtrar por título (búsqueda parcial, case-insensitive)
+          required: false
+          schema:
+            type: string
+          example: naruto
+        - name: status
+          in: query
+          description: Filtrar por estado de la obra
+          required: false
+          schema:
+            type: string
+            enum: [En emision, Finalizado, Pausado, Cancelado]
+        - name: type
+          in: query
+          description: Filtrar por tipo de obra
+          required: false
+          schema:
+            type: string
+            enum: [Manga, Manhwa, Manhua]
+        - name: genre
+          in: query
+          description: Filtrar por género
+          required: false
+          schema:
+            type: string
+          example: Accion
+      responses:
+        '200':
+          description: Lista de obras
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Work'
+        '400':
+          description: Query params inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /work/{id}:
+    get:
+      tags:
+        - Works
+      summary: Obtener una obra por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId de la obra (24 caracteres hex)
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          example: 6a3cd574fee2acacf2cbded7
+      responses:
+        '200':
+          description: Obra encontrada
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/WorkDetail'
+        '400':
+          description: ID con formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Obra no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ─────────────────────────────────────────────
+  # CHAPTERS
+  # ─────────────────────────────────────────────
+
+  /chapter/{id}:
+    get:
+      tags:
+        - Chapters
+      summary: Obtener un capítulo por ID
+      description: >
+        Retorna el capítulo con sus comentarios populados.
+        Si el usuario está autenticado y envía el header `Authorization`,
+        se registra automáticamente el progreso de lectura.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: MongoDB ObjectId del capítulo (24 caracteres hex)
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          example: 6a3ce9fdf8e20f12574a9a6b
+      responses:
+        '200':
+          description: Capítulo encontrado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Chapter'
+        '400':
+          description: ID con formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Capítulo no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ─────────────────────────────────────────────
+  # COMMENTS
+  # ─────────────────────────────────────────────
+
+  /comment/work/{workId}:
+    get:
+      tags:
+        - Comments
+      summary: Obtener comentarios de una obra
+      parameters:
+        - name: workId
+          in: path
+          required: true
+          description: MongoDB ObjectId de la obra
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          example: 6a3cd574fee2acacf2cbded7
+      responses:
+        '200':
+          description: Lista de comentarios de la obra
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Comment'
+        '400':
+          description: ID con formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /comment/chapter/{chapterId}:
+    get:
+      tags:
+        - Comments
+      summary: Obtener comentarios de un capítulo
+      parameters:
+        - name: chapterId
+          in: path
+          required: true
+          description: MongoDB ObjectId del capítulo
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{24}$'
+          example: 6a3ce9fdf8e20f12574a9a6b
+      responses:
+        '200':
+          description: Lista de comentarios del capítulo
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Comment'
+        '400':
+          description: ID con formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ─────────────────────────────────────────────
+# COMPONENTS
+# ─────────────────────────────────────────────
+
+components:
+  schemas:
+
+    # ── Request bodies ──────────────────────────
+
+    RegisterBody:
+      type: object
+      required: [username, email, password, role]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          minLength: 6
+          example: Secret123!
+        role:
+          type: string
+          enum: [ADMINISTRATOR, READER, EDITOR]
+          example: READER
+
+    LoginBody:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          minLength: 8
+          description: >
+            Debe contener al menos una mayúscula, una minúscula,
+            un número y un carácter especial (#@$!%*?&).
+          example: Secret123!
+
+    # ── Response wrappers ───────────────────────
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        code:
+          type: integer
+          example: 200
+        data:
+          description: Payload de la respuesta (varía por endpoint)
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: integer
+          example: 400
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Work not found
+
+    # ── Auth ────────────────────────────────────
+
+    AuthResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/UserPublic'
+                token:
+                  type: string
+                  description: JWT de sesión
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    UserPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          example: john@example.com
+        role:
+          type: string
+          enum: [ADMINISTRATOR, READER, EDITOR]
+          example: READER
+
+    # ── Works ───────────────────────────────────
+
+    Work:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6a3cd574fee2acacf2cbded7
+        title:
+          type: string
+          example: Solo Leveling
+        synopsis:
+          type: string
+          example: Un cazador débil se convierte en el más poderoso del mundo.
+        banner:
+          type: string
+          format: uri
+          example: https://public.blob.vercel-storage.com/comics/abc/covers/cover.jpg
+        type:
+          type: string
+          enum: [Manga, Manhwa, Manhua]
+          example: Manhwa
+        status:
+          type: string
+          enum: [En emision, Finalizado, Pausado, Cancelado]
+          example: Finalizado
+        genres:
+          type: array
+          items:
+            type: string
+          example: [Accion, Fantasia]
+        visits:
+          type: integer
+          example: 15000
+        followers:
+          type: integer
+          example: 3200
+
+    WorkDetail:
+      allOf:
+        - $ref: '#/components/schemas/Work'
+        - type: object
+          properties:
+            chapters:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChapterSummary'
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Comment'
+
+    # ── Chapters ────────────────────────────────
+
+    ChapterSummary:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6a3ce9fdf8e20f12574a9a6b
+        number:
+          type: number
+          example: 1
+        status:
+          type: string
+          enum: [Publicado, Borrador, Programado, Oculto]
+          example: Publicado
+        publishedAt:
+          type: string
+          format: date-time
+          example: '2026-06-24T00:00:00.000Z'
+
+    Chapter:
+      allOf:
+        - $ref: '#/components/schemas/ChapterSummary'
+        - type: object
+          properties:
+            images:
+              type: array
+              items:
+                type: string
+                format: uri
+              example:
+                - https://public.blob.vercel-storage.com/comics/abc/def/1_01.jpg
+                - https://public.blob.vercel-storage.com/comics/abc/def/1_02.jpg
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Comment'
+
+    # ── Comments ────────────────────────────────
+
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6a3cf1234abc567890def123
+        userId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        content:
+          type: string
+          example: Excelente capítulo
+        publishedAt:
+          type: string
+          format: date-time
+          example: '2026-06-25T05:00:00.000Z'
+        comments:
+          type: array
+          description: Respuestas anidadas al comentario
+          items:
+            $ref: '#/components/schemas/Comment'
