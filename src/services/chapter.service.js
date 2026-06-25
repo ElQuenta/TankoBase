@@ -1,32 +1,30 @@
 import { Chapter } from "../data/chapters.js";
 import { Work } from "../data/works.js";
+
+import * as ReadingService from "./readingProgress.service.js";
+
 import { AppError } from "../utils/errorApp.util.js";
+import { createLogger, catchAndLogError } from "../utils/logger.util.js";
 
-async function findWorkByChapterId(chapterId) {
-  return Work.findOne({ chapters: chapterId });
-}
+const logger = createLogger("Chapter Service");
 
-async function chapterBelongsToWork(workId, chapterId) {
-  const work = await Work.findById(workId);
-
-  if (!work) {
-    return false;
+export async function getChapterById(chapterId, userId) {
+  try {
+    const chapter = await getChapter(chapterId);
+    if (userId) {
+      const readingProgress = await ReadingService.getReadingProgressByUserId(userId)
+      if (readingProgress && !readingProgress.some(rp => rp.episodeId === chapterId)) {
+        await ReadingService.createReadingProgress(userId, chapterId);
+      }
+    }
+    return chapter;
+  } catch (error) {
+    catchAndLogError(logger, error, "Error retrieving chapter by ID");
   }
-
-  return work.chapters.some((id) => id.toString() === chapterId.toString());
-}
-
-export async function getChapterById(chapterId) {
-  const chapter = await Chapter.findById(chapterId).populate("comments");
-  return chapter;
 }
 
 export async function createChapter(workId, chapterData) {
-  const work = await Work.findById(workId);
-
-  if (!work) {
-    throw new AppError("Work not found", 404);
-  }
+  const work = await getWork(workId);
 
   if (chapterData.number === undefined || chapterData.number === null) {
     throw new AppError("Chapter number is required", 400);
@@ -51,9 +49,8 @@ export async function createChapter(workId, chapterData) {
   }
 
   const chapter = await Chapter.create({
-    number: chapterData.number,
-    publishedAt: chapterData.publishedAt ?? new Date(),
-    status,
+    ...chapterData,
+    workId,
     images: chapterData.images ?? [],
     comments: []
   });
@@ -64,79 +61,75 @@ export async function createChapter(workId, chapterData) {
   return chapter;
 }
 
-export async function updateChapterById(chapterId, updateData) {
-  const chapter = await Chapter.findById(chapterId);
-
-  if (!chapter) {
-    return null;
-  }
-
-  const nextStatus = updateData.status ?? chapter.status;
-  const nextImages =
-    updateData.images !== undefined ? updateData.images : chapter.images;
-
-  if (
-    nextStatus === "Publicado" &&
-    (!Array.isArray(nextImages) || nextImages.length === 0)
-  ) {
-    throw new AppError("Published chapter must have at least one image", 400);
-  }
-
-  if (updateData.number !== undefined) {
-    const work = await findWorkByChapterId(chapterId);
-
-    if (work) {
-      const chapterIds = work.chapters.filter(
-        (id) => id.toString() !== chapterId.toString()
-      );
-
-      const duplicateNumber = await Chapter.findOne({
-        _id: { $in: chapterIds },
-        number: updateData.number
-      });
-
-      if (duplicateNumber) {
-        throw new AppError("Chapter number already exists for this work", 400);
-      }
+export async function updateChapterById(chapterId, updateData, type) {
+  try {
+    const chapter = await getChapter(chapterId);
+    logger.debug(`Updating chapter ${chapterId} with data:`, {data: updateData, type: type});
+    const nextStatus = updateData.status ?? chapter.status;
+    let nextImages = null;
+    if (type === "APPEND" && Array.isArray(updateData.images)) {
+      nextImages = [...chapter.images, ...updateData.images];
+    } else if (type === "REPOST" && Array.isArray(updateData.images)) {
+      nextImages = updateData.images;
+    } else {
+      nextImages = chapter.images;
     }
+
+    if (
+      nextStatus === "Publicado" &&
+      (!Array.isArray(nextImages) || nextImages.length === 0)
+    ) {
+      throw new AppError("Published chapter must have at least one image", 400);
+    }
+
+    const updatedChapter = await Chapter.findByIdAndUpdate(chapterId, { ...updateData, images: nextImages }, {
+      new: true,
+      runValidators: true
+    });
+
+    return updatedChapter;
+  } catch (error) {
+    catchAndLogError(logger, error, "Error updating chapter by ID");
   }
-
-  const updatedChapter = await Chapter.findByIdAndUpdate(chapterId, updateData, {
-    new: true,
-    runValidators: true
-  });
-
-  return updatedChapter;
 }
 
 export async function deleteChapterById(chapterId) {
-  const chapter = await Chapter.findById(chapterId);
+  try {
+    const chapter = await getChapter(chapterId);
 
-  if (!chapter) {
-    return null;
+    await Work.updateMany(
+      { chapters: chapterId },
+      { $pull: { chapters: chapterId } }
+    );
+
+    const deletedChapter = await Chapter.findByIdAndDelete(chapterId);
+    return deletedChapter;
+  } catch (error) {
+    catchAndLogError(logger, error, "Error deleting chapter by ID");
   }
-
-  await Work.updateMany(
-    { chapters: chapterId },
-    { $pull: { chapters: chapterId } }
-  );
-
-  const deletedChapter = await Chapter.findByIdAndDelete(chapterId);
-  return deletedChapter;
 }
 
-export async function validateChapterInWork(workId, chapterId) {
-  const belongs = await chapterBelongsToWork(workId, chapterId);
+export const validateChapterInWork = async (workId, chapterId) => {
+  const work = await getWork(workId);
+  await getChapter(chapterId);
+  const chapterExistsInWork = work.chapters.some(
+    (chapter) => chapter.toString() === chapterId
+  );
+  return chapterExistsInWork;
+};
 
-  if (!belongs) {
-    throw new AppError("Chapter does not belong to this work", 400);
+async function getWork(workId) {
+  const work = await Work.findById(workId);
+  if (!work) {
+    throw new AppError("Work not found", 404);
   }
+  return work;
+}
 
-  const chapter = await Chapter.findById(chapterId);
-
+async function getChapter(chapterId) {
+  const chapter = await Chapter.findById(chapterId).populate("comments");
   if (!chapter) {
     throw new AppError("Chapter not found", 404);
   }
-
   return chapter;
 }

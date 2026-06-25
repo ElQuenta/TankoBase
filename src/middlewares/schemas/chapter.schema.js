@@ -6,8 +6,11 @@ const mongoId = Joi.string().hex().length(24);
 
 export const createChapterSchema = Joi.object({
   workId: mongoId.required(),
-  number: Joi.number().integer().positive().required(),
-  publishedAt: Joi.date().optional(),
+  number: Joi.number()
+    .positive()
+    .precision(1)
+    .required(),
+  vercelId: Joi.string().uuid().optional(),
   status: Joi.string()
     .valid(...CHAPTER_STATUS)
     .optional(),
@@ -15,8 +18,6 @@ export const createChapterSchema = Joi.object({
 });
 
 export const updateChapterSchema = Joi.object({
-  number: Joi.number().integer().positive().optional(),
-  publishedAt: Joi.date().optional(),
   status: Joi.string()
     .valid(...CHAPTER_STATUS)
     .optional(),
@@ -25,4 +26,8 @@ export const updateChapterSchema = Joi.object({
 
 export const chapterParamSchema = Joi.object({
   id: mongoId.required()
+});
+
+export const chapterUpdateTypeSchema = Joi.object({
+  type: Joi.string().valid("REPOST", "APPEND", "STAND").required()
 });

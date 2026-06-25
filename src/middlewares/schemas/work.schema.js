@@ -5,6 +5,7 @@ import { WORK_STATUS, WORK_TYPES } from "../../utils/work.constants.js";
 export const createWorkSchema = Joi.object({
   title: Joi.string().required(),
   synopsis: Joi.string().optional().allow(""),
+  vercelId: Joi.string().uuid().optional(),
   banner: Joi.string().required(),
   type: Joi.string()
     .valid(...WORK_TYPES)

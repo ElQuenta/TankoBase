@@ -5,6 +5,7 @@ const workSchema = new mongoose.Schema({
   title: String,
   synopsis: String,
   banner: String,
+  vercelId: String,
   type: { type: String, enum: WORK_TYPES },
   status: { type: String, enum: WORK_STATUS },
   visits: Number,

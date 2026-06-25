@@ -1,4 +1,4 @@
-import * as AuthService from '../service/auth.service.js';
+import * as AuthService from '../services/auth.service.js';
 
 import { CreatedResponseHandler, SuccessResponseHandler } from '../handlers/success.handler.js'
 import { ErrorResponseHandler } from '../handlers/error.handler.js'

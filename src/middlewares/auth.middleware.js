@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-import { AppError } from '../utils/appError.util.js';
+import { AppError } from '../utils/errorApp.util.js';
 import { ErrorResponseHandler } from '../handlers/error.handler.js';
 import config from '../config/config.js';
 
