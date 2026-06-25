@@ -20,6 +20,7 @@ export function validateQuery(schema) {
 
       return;
     }
+    req.query = value;
     next();
   };
 }
