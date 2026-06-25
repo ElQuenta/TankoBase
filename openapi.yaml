@@ -5,8 +5,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:3000/api
-    description: Servidor local de desarrollo
+  - url: https://tankobase.onrender.com/api
+    description: Servidor en producción
 
 tags:
   - name: Auth
