@@ -7,13 +7,15 @@ const {
   PORT: port = 3000,
   DATABASE_URL: databaseUrl,
   BLOB_READ_WRITE_TOKEN: vercelBlobToken,
-  LOG_LEVEL: logLevel = 'info'
+  LOG_LEVEL: logLevel = 'info',
+  JWT_SECRET: jwtSecret = 'SuperSecretKeyForJWT'
 } = process.env;
 
 const config = {
   server: {
     port: parseInt(port, 10),
-    logLevel: logLevel
+    logLevel: logLevel,
+    jwtSecret: jwtSecret
   },
   database: {
     mongoUri: mongoUri,
