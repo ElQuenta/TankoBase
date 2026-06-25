@@ -34,10 +34,11 @@ export async function createChapter(workId, chapterData) {
 
   const status = chapterData.status ?? "Borrador";
 
-  if (status === "Publicado") {
-    if (!Array.isArray(chapterData.images) || chapterData.images.length === 0) {
-      throw new AppError("Published chapter must have at least one image", 400);
-    }
+  if (
+    status === "Publicado" &&
+    (!Array.isArray(chapterData.images) || chapterData.images.length === 0)
+  ) {
+    throw new AppError("Published chapter must have at least one image", 400);
   }
 
   const duplicateNumber = await Chapter.findOne({
@@ -70,12 +71,15 @@ export async function updateChapterById(chapterId, updateData) {
     return null;
   }
 
-  if (updateData.status === "Publicado") {
-    const images = updateData.images ?? chapter.images;
+  const nextStatus = updateData.status ?? chapter.status;
+  const nextImages =
+    updateData.images !== undefined ? updateData.images : chapter.images;
 
-    if (!images || images.length === 0) {
-      throw new AppError("Published chapter must have at least one image", 400);
-    }
+  if (
+    nextStatus === "Publicado" &&
+    (!Array.isArray(nextImages) || nextImages.length === 0)
+  ) {
+    throw new AppError("Published chapter must have at least one image", 400);
   }
 
   if (updateData.number !== undefined) {

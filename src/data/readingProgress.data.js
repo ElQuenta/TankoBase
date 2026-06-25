@@ -28,7 +28,7 @@ export async function getReadingProgressByWork(userId, seriesId) {
       deletedAt: null
     },
     orderBy: {
-      updatedAt: "desc"
+      createdAt: "desc"
     }
   });
 }
@@ -43,7 +43,7 @@ export async function createReadingProgress(userId, seriesId, episodeId) {
   });
 }
 
-export async function updateReadingProgress(userId, seriesId, episodeId) {
+export async function softDeleteReadingProgress(userId, seriesId, episodeId) {
   return prisma.readingProgress.update({
     where: {
       userId_seriesId_episodeId: {
@@ -53,27 +53,7 @@ export async function updateReadingProgress(userId, seriesId, episodeId) {
       }
     },
     data: {
-      updatedAt: new Date()
-    }
-  });
-}
-
-export async function upsertReadingProgress(userId, seriesId, episodeId) {
-  return prisma.readingProgress.upsert({
-    where: {
-      userId_seriesId_episodeId: {
-        userId,
-        seriesId,
-        episodeId
-      }
-    },
-    update: {
-      updatedAt: new Date()
-    },
-    create: {
-      userId,
-      seriesId,
-      episodeId
+      deletedAt: new Date()
     }
   });
 }

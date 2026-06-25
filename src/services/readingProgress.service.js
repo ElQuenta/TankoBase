@@ -36,20 +36,22 @@ export async function createReadingProgress(userId, workId, chapterId) {
   return progress;
 }
 
-export async function updateReadingProgress(userId, workId, chapterId) {
-  const work = await Work.findById(workId);
-
-  if (!work) {
-    throw new AppError("Work not found", 404);
-  }
-
-  await validateChapterInWork(workId, chapterId);
-
-  const progress = await ReadingProgressData.upsertReadingProgress(
+export async function deleteReadingProgress(userId, workId, chapterId) {
+  const existingProgress = await ReadingProgressData.findReadingProgress(
     userId,
     workId,
     chapterId
   );
 
-  return progress;
+  if (!existingProgress) {
+    return null;
+  }
+
+  const deletedProgress = await ReadingProgressData.softDeleteReadingProgress(
+    userId,
+    workId,
+    chapterId
+  );
+
+  return deletedProgress;
 }
